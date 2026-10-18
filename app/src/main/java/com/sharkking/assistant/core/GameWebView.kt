@@ -342,6 +342,12 @@ class GameWebViewHolder(
     }
 
     private inner class Client : WebViewClient() {
+        // 运行在 WebView 的 IO 线程，可以同步读写磁盘和网络
+        override fun shouldInterceptRequest(
+            v: WebView?, req: WebResourceRequest?,
+        ): android.webkit.WebResourceResponse? =
+            req?.let { runCatching { RemoteCache.intercept(it) }.getOrNull() }
+
         override fun onPageStarted(v: WebView?, url: String?, favicon: Bitmap?) {
             injectEarly()
         }

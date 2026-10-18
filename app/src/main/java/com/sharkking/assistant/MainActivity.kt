@@ -22,6 +22,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        com.sharkking.assistant.core.RemoteCache.init(this)
         // 不用 enableEdgeToEdge：内容延伸到系统栏后，底栏会被导航键遮住
         store = AppStore(applicationContext)
 

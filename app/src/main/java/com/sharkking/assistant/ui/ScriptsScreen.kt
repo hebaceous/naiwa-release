@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.sharkking.assistant.BuildConfig
 import com.sharkking.assistant.core.ReleaseInfo
+import com.sharkking.assistant.core.RemoteCache
 import com.sharkking.assistant.core.UpdateChecker
 import com.sharkking.assistant.core.UpdateResult
 import com.sharkking.assistant.data.AppStore
@@ -123,6 +124,7 @@ fun ScriptsScreen(store: AppStore) {
                     }
                 }
             }
+            item { ResCacheCard(tip) }
             item { VersionFooter(tip) }
             item { Spacer(Modifier.height(16.dp)) }
         }
@@ -146,6 +148,38 @@ fun ScriptsScreen(store: AppStore) {
     }
 
     TipHost(tip, Modifier.padding(top = 48.dp))
+    }
+}
+
+/** 游戏资源本地缓存：开关、占用大小、一键清理 */
+@Composable
+private fun ResCacheCard(tip: TipState) {
+    val ctx = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var on by remember { mutableStateOf(RemoteCache.enabled) }
+    var size by remember { mutableStateOf(-1L) }
+    LaunchedEffect(Unit) {
+        size = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { RemoteCache.sizeBytes() }
+    }
+    Row(
+        Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text("游戏资源本地缓存", style = MaterialTheme.typography.bodyMedium)
+            Text(
+                if (size < 0) "统计中…" else "已缓存 %.1f MB · 改动后刷新游戏生效".format(size / 1048576.0),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        TextButton(onClick = {
+            scope.launch {
+                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { RemoteCache.clear() }
+                size = 0; tip.show("缓存已清空")
+            }
+        }) { Text("清理") }
+        Switch(checked = on, onCheckedChange = { on = it; RemoteCache.setEnabled(ctx, it) })
     }
 }
 

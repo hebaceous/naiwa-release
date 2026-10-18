@@ -12,8 +12,8 @@ object RendererCache {
 
     private const val TAG = "奶蛙"
     private const val ASSET_ROOT = "renderer"
-    // 改动 renderer 下任何文件都要升这个版本号，否则旧缓存不会被替换
-    private const val STAMP = ".copied_v95"
+    // 跟随 versionCode：每次出包自动刷新缓存，不会再出现改了文件却仍用旧缓存
+    private val STAMP = ".copied_v${com.sharkking.assistant.BuildConfig.VERSION_CODE}"
 
     fun ensure(ctx: Context): File {
         val dir = File(ctx.cacheDir, "renderer")
